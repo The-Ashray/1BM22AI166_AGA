@@ -1,0 +1,57 @@
+import tensorflow as tf
+from tensorflow.keras import layers, models
+from tensorflow.keras.datasets import mnist
+
+# Load MNIST dataset
+(x_train, _), (x_test, _) = mnist.load_data()
+x_train = x_train.astype('float32') / 255.0
+x_test = x_test.astype('float32') / 255.0
+
+# Flatten the images for input into the encoder
+x_train = x_train.reshape(-1, 28 * 28)
+x_test = x_test.reshape(-1, 28 * 28)
+
+# Define a simple autoencoder model
+input_img = layers.Input(shape=(28 * 28,))
+encoded = layers.Dense(128, activation='relu')(input_img)
+decoded = layers.Dense(28 * 28, activation='sigmoid')(encoded)
+
+autoencoder = models.Model(input_img, decoded)
+
+# Compile and train the model
+autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+autoencoder.fit(x_train, x_train, epochs=10, batch_size=256, shuffle=True, validation_data=(x_test, x_test))
+
+# Evaluate the model
+autoencoder.evaluate(x_test, x_test)
+
+# Define an undercomplete autoencoder model
+input_img = layers.Input(shape=(28 * 28,))
+encoded = layers.Dense(32, activation='relu')(input_img)  # Smaller bottleneck size
+decoded = layers.Dense(28 * 28, activation='sigmoid')(encoded)
+
+undercomplete_autoencoder = models.Model(input_img, decoded)
+
+# Compile and train the model
+undercomplete_autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+undercomplete_autoencoder.fit(x_train, x_train, epochs=10, batch_size=256, shuffle=True, validation_data=(x_test, x_test))
+
+# Evaluate the model
+undercomplete_autoencoder.evaluate(x_test, x_test)
+
+
+
+
+# Define an overcomplete autoencoder model
+input_img = layers.Input(shape=(28 * 28,))
+encoded = layers.Dense(512, activation='relu')(input_img)  # Larger bottleneck size
+decoded = layers.Dense(28 * 28, activation='sigmoid')(encoded)
+
+overcomplete_autoencoder = models.Model(input_img, decoded)
+
+# Compile and train the model
+overcomplete_autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+overcomplete_autoencoder.fit(x_train, x_train, epochs=10, batch_size=256, shuffle=True, validation_data=(x_test, x_test))
+
+# Evaluate the model
+overcomplete_autoencoder.evaluate(x_test, x_test)
